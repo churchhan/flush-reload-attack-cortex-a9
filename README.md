@@ -17,7 +17,7 @@ The makefile is located at app/src/main/jni/Android.mk
 
 While compiled, the spy program can be launched like this:
 
-./spy <path_to_shared_library> <output_file>
+./spy path_to_shared_library output_file
 
 <path_to_shared_library> == > Generally libraries are dropped at
 /data/app-lib/application.package.name/libs/*.so
