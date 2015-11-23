@@ -19,8 +19,8 @@ While compiled, the spy program can be launched like this:
 
 ./spy path_to_shared_library output_file
 
-<path_to_shared_library> == > Generally libraries are dropped at
+path_to_shared_library == > Generally libraries are dropped at
 /data/app-lib/application.package.name/libs/*.so
 
-<output_file> results/timings will be stored in this file
+output_file =====>  results/timings will be stored in this file
 
