@@ -13,7 +13,7 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := spy
 LOCAL_ARM_MODE := arm
-LOCAL_SRC_FILES := spy.c asm.S
+LOCAL_SRC_FILES := spy.c asm.S Test1.c 
 LOCAL_C_INCLUDES += $(local_c_includes)
 LOCAL_LDLIBS += -L/home/razaina/android-ndk-r10d/platforms/android-21/arch-arm/usr/lib -llog -landroid
 LOCAL_CFLAGS := -I/home/razaina/android-ndk-r10d/platforms/android-21/arch-arm/usr/include/
