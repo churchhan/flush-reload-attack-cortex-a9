@@ -12,10 +12,13 @@
 #include <asm/unistd.h>
 #include "Args.h"
 #include "Test1.h"
+#include "Test2.h"
+#include "ClearCache.h"
 
 #define MAX_NUM_OF_ADDRS 10
 #define TIME_SLOTS 50000
-
+#define TEST1 1
+#define TEST2 2
 
 void memread(char *address);
 size_t *timings;
@@ -41,7 +44,7 @@ long perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
 
 //Method used for cleaning up stuff while exiting the program
 void cleanup_args(struct args_st *arguments) {
-    close(arguments->bin_fd);
+    close((int)arguments->bin_fd);
     fclose(arguments->out_file);
 }
 
@@ -50,8 +53,8 @@ void cleanup_args(struct args_st *arguments) {
 bool read_args(struct args_st *arguments, int argc, char *argv[]) {
 
 
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <binary> <out>\n", argv[0]);
+    if (argc != 5) {
+        fprintf(stderr, "Usage: %s <binary> <output> <test> <stride>\n", argv[0]);
         goto fail;
     }
 
@@ -60,6 +63,12 @@ bool read_args(struct args_st *arguments, int argc, char *argv[]) {
         perror("error opening binary path");
         goto fail;
     }
+
+    arguments->test = atoi(argv[3]);
+    arguments->stride = atoi(argv[4]);
+    
+    printf("[+] Test #%d\n", arguments->test);
+    printf("[+] Stride = %d\n", arguments->stride);
 
     size_t size = lseek(arguments->bin_fd, 0, SEEK_END);
     if(size == 0)
@@ -86,12 +95,12 @@ bool read_args(struct args_st *arguments, int argc, char *argv[]) {
         arguments->map_size += 1;
     }
 
-    /*//char *out_path = argv[3];*/
-    /*char *out_path = argv[2];*/
-    /*if ((arguments->out_file = fopen(out_path, "w+")) == NULL) {*/
-        /*perror("Error fopen out_path");*/
-        /*goto out_fail;*/
-    /*}*/
+    //char *out_path = argv[3];
+    char *out_path = argv[2];
+    if ((arguments->out_file = fopen(out_path, "w+")) == NULL) {
+        perror("Error fopen out_path");
+        goto out_fail;
+    }
 
     return true;
 
@@ -154,7 +163,16 @@ void adjust_addresses_offset(void *target_base_address, char **addrs, size_t num
 
 void spy(struct args_st *arguments, size_t *timings)
 {
-    Test1(arguments, timings);
+    int test = arguments->test;
+
+    if(test == TEST1)
+    {
+        Test1(arguments, timings);
+    }
+    else if(test == TEST2)
+    {
+        Test2(arguments, timings);
+    }
 }
 
 
@@ -188,7 +206,7 @@ int main(int argc, char *argv[])
 
     //timings is a data structure in which the timings will be stored before to be displayed out at
     //the end of the spying step
-    timings = malloc(((arguments.end_address - arguments.base_address)/64) * sizeof(size_t*));
+    timings = malloc(((arguments.end_address - arguments.base_address)/arguments.stride) * sizeof(size_t*));
 
 
     //run the spying step
@@ -199,9 +217,11 @@ int main(int argc, char *argv[])
     //Display timings/results
     char *probe;
     i = 0;
-    for(probe = arguments.base_address; probe < arguments.end_address; probe += 64) {
-        printf("%lld\n", (long long)timings[i++]);
+    for(probe = arguments.base_address; probe < arguments.end_address; probe += arguments.stride) {
+        fprintf(arguments.out_file, "%lld\n", (long long)timings[i++]);
     }
+
+    fclose(arguments.out_file);
 
     munmap(target_base_addr, arguments.target_size);
     cleanup_args(&arguments);

@@ -21,5 +21,11 @@ struct args_st {
     char *base_address;
 
     char *end_address;
+
+    //The test to run
+    int test;
+
+    //number of stride while probing from base_address to end_address 
+    int stride;
 };
 #endif

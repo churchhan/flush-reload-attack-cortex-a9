@@ -2,8 +2,9 @@
 #include <linux/perf_event.h>
 #include <stdio.h>
 #include "Args.h"
+#include "ClearCache.h"
 //method for timing a memory access (memory read) of addresses
-void Test1(struct args_st *arguments, size_t *timings)
+void Test2(struct args_st *arguments, size_t *timings)
 {
     size_t slot = 0;
 
@@ -56,6 +57,7 @@ void Test1(struct args_st *arguments, size_t *timings)
     sched_yield();
     for(probe = arguments->base_address; probe < arguments->end_address; probe += arguments->stride)
     {
+        clearcache(arguments->base_address, arguments->end_address);
         //start counting the cpu cycles
         ioctl(perf_event_fd, PERF_EVENT_IOC_RESET, 0);
         ioctl(perf_event_fd, PERF_EVENT_IOC_ENABLE, 0);
